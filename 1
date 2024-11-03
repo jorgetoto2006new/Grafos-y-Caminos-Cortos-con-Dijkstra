@@ -1,0 +1,88 @@
+class Grafo:
+    def __init__(self, num_nodos):
+        # Inicializa el número de nodos y la matriz de adyacencia con ceros (sin conexiones)
+        self.num_nodos = num_nodos
+        self.matriz_adyacencia = [[0] * num_nodos for _ in range(num_nodos)]
+
+    # Método para agregar un nuevo nodo al grafo
+    def agregar_nodo(self):
+        # Incrementa el contador de nodos en 1
+        self.num_nodos += 1
+        # Añade un 0 a cada fila existente para representar la nueva columna del nodo
+        for fila in self.matriz_adyacencia:
+            fila.append(0)
+        # Añade una nueva fila llena de ceros para el nuevo nodo
+        self.matriz_adyacencia.append([0] * self.num_nodos)
+
+    # Método para agregar una arista dirigida con un peso entre dos nodos
+    def agregar_arista(self, inicio, fin, peso=1):
+        # Verifica que los nodos de inicio y fin estén dentro del rango de nodos existentes
+        if inicio < self.num_nodos and fin < self.num_nodos:
+            # Establece el peso de la arista en la matriz de adyacencia
+            self.matriz_adyacencia[inicio][fin] = peso
+
+    # Método para mostrar la matriz de adyacencia en la consola
+    def mostrar_matriz_adyacencia(self):
+        # Imprime cada fila de la matriz para visualizar el grafo
+        for fila in self.matriz_adyacencia:
+            print(fila)
+
+# Importa el módulo sys para usar un valor muy grande (infinito) en el algoritmo de Dijkstra
+import sys
+
+# Definición de una clase que utiliza las funcionalidades de la clase Grafo y agrega el algoritmo de Dijkstra
+class GrafoConDijkstra(Grafo):
+    # Método para encontrar el camino más corto desde un nodo de origen usando el algoritmo de Dijkstra
+    def dijkstra(self, origen):
+        # Inicializa una lista de distancias con un valor muy grande (infinito)
+        dist = [sys.maxsize] * self.num_nodos
+        # La distancia al nodo de origen es 0, ya que no se necesita viajar para llegar a sí mismo
+        dist[origen] = 0
+        # Lista de nodos visitados, inicialmente todos están sin visitar (False)
+        visitado = [False] * self.num_nodos
+
+        # Bucle que se repite num_nodos veces para encontrar la distancia mínima a todos los nodos
+        for _ in range(self.num_nodos):
+            min_dist = sys.maxsize  # Variable para rastrear la distancia mínima encontrada
+            u = -1  # Variable para almacenar el índice del nodo con la menor distancia no visitada
+
+            # Busca el nodo no visitado con la distancia más corta
+            for i in range(self.num_nodos):
+                if not visitado[i] and dist[i] < min_dist:
+                    min_dist = dist[i]
+                    u = i  # Actualiza el nodo con la menor distancia
+
+            # Marca el nodo u como visitado
+            visitado[u] = True
+
+            # Actualiza las distancias a los nodos adyacentes al nodo u
+            for v in range(self.num_nodos):
+                # Verifica si hay una arista desde u a v y si v no ha sido visitado
+                if self.matriz_adyacencia[u][v] > 0 and not visitado[v]:
+                    # Calcula la nueva distancia potencial al nodo v
+                    nueva_dist = dist[u] + self.matriz_adyacencia[u][v]
+                    # Si la nueva distancia es menor que la distancia actual almacenada, actualiza la distancia
+                    if nueva_dist < dist[v]:
+                        dist[v] = nueva_dist
+
+        # Devuelve la lista de distancias mínimas desde el nodo de origen a todos los demás nodos
+        return dist
+
+# Crear un grafo con 5 nodos
+grafo = GrafoConDijkstra(5)
+
+# Agregar algunas aristas con pesos específicos
+grafo.agregar_arista(0, 1, 10)
+grafo.agregar_arista(0, 4, 3)
+grafo.agregar_arista(1, 2, 2)
+grafo.agregar_arista(2, 3, 9)
+grafo.agregar_arista(4, 2, 1)
+grafo.agregar_arista(4, 3, 8)
+
+# Mostrar la matriz de adyacencia para visualizar las conexiones entre los nodos
+print("Matriz de Adyacencia:")
+grafo.mostrar_matriz_adyacencia()
+
+# Calcular el camino más corto desde el nodo 0 y mostrar las distancias
+distancias = grafo.dijkstra(0)
+print("Distancias desde el nodo 0:", distancias)
